@@ -6,11 +6,23 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 10:10:42 by badriano          #+#    #+#             */
-/*   Updated: 2024/09/19 13:06:44 by badriano         ###   ########.fr       */
+/*   Updated: 2024/09/26 19:34:37 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/philosopher.h"
+
+long	get_time()
+{
+	struct timeval time;
+	gettimeofday(&time, 0);
+	return((time.tv_sec * 1000) + (time.tv_usec / 1000)); 	
+}
+
+long	get_current_time(long start)
+{
+	return(get_time() - start);
+}
 
 void check_arguments_int(char **argv)
 {
@@ -35,6 +47,7 @@ void check_arguments_int(char **argv)
         i++;
     }
 }
+
 void check_arguments(int argc, char **argv)
 {
     if (argc == 5)
@@ -49,7 +62,8 @@ void check_arguments(int argc, char **argv)
     }
     return ;
 }
-void create_philosophers_id(t_philo *philos, int num_of_philo)
+
+void create_philosophers_id(t_philo *philos, int num_of_philo,  pthread_mutex_t *forks)
 {
     int i;
     
@@ -59,54 +73,65 @@ void create_philosophers_id(t_philo *philos, int num_of_philo)
         philos[i].id = i + 1;
         philos[i].eat_count = 0;
         philos[i].total_philos = num_of_philo;
+	philos[i].fork = forks;
         i++;
     }
     return ;
 }
-void ft_sleep(t_philo philo)
+
+void ft_sleep(t_philo philo, long start)
 {
-    printf("philosopher %d is slepping\n", philo.id);
+    printf("%ld philosopher %d is slepping\n", get_current_time(start) , philo.id);
     usleep(200 * 1000);
 }
-void ft_right_fork(t_philo philo, pthread_mutex_t *forks)
+
+void ft_right_fork(t_philo philo, pthread_mutex_t *forks, long start)
 {
     pthread_mutex_lock(&forks[(philo.id - 1)]);
-    printf("philosopher %d held the right fork\n", philo.id);
+    printf("%ld philosopher %d held the right fork\n", get_current_time(start), philo.id);
 }
-void ft_left_fork(t_philo philo, pthread_mutex_t *forks)
+
+void ft_left_fork(t_philo philo, pthread_mutex_t *forks, long start)
 {
     pthread_mutex_lock(&forks[(philo.id  % philo.total_philos)]);
-    printf("philosopher %d held the left fork\n", philo.id);
+    printf("%ld philosopher %d held the left fork\n", get_current_time(start), philo.id);
 }
-void ft_eat(t_philo philo, pthread_mutex_t *forks)
+
+void ft_eat(t_philo philo, pthread_mutex_t *forks, long start)
 {
-    ft_right_fork(philo, forks);
-    ft_left_fork(philo, forks);
-    printf("philosopher %d is eating\n", philo.id);
+    ft_right_fork(philo, forks, start);
+    ft_left_fork(philo, forks, start);
+    printf("%ld philosopher %d is eating\n", get_current_time(start), philo.id);
     usleep(200 * 1000);
-    printf("philosopher %d left the right fork\n", philo.id);
+    printf("%ld philosopher %d left the right fork\n", get_current_time(start), philo.id);
     pthread_mutex_unlock(&forks[(philo.id - 1)]);
-    printf("philosopher %d left the left fork\n", philo.id);
+    printf("%ld philosopher %d left the left fork\n", get_current_time(start), philo.id);
     pthread_mutex_unlock(&forks[(philo.id  % philo.total_philos)]);
     
 }
-void ft_think(t_philo philo)
+
+void ft_think(t_philo philo, long start)
 {
-    printf("philosopher %d is thinking\n", philo.id);
+    printf("%ld philosopher %d is thinking\n", get_current_time(start), philo.id);
 }
+
 void *philosopher_process(void *arg)
 {
     t_philo philo = *((t_philo *)arg);
-    
+    long	 start;
+
+    start = get_time();
     while (1)
     {
-        ft_think(philo); 
-        ft_eat(philo, forks);
-        ft_sleep(philo);  
+        ft_think(philo, start); 
+        ft_eat(philo, philo.fork, start);
+        ft_sleep(philo, start);  
     }
     free(arg);
     return NULL;
 }
+
+
 void main_porcess(char **argv)
 {
     int num_of_philo;
@@ -114,25 +139,25 @@ void main_porcess(char **argv)
     pthread_t *threads;
     int j;
     int k;
+    int l;
 
     j = 0;
     k = 0;
+    l = 0;
     num_of_philo = atoi(argv[1]);
     philos = malloc(sizeof(t_philo) * num_of_philo);
-    create_philosophers_id(philos, num_of_philo);
     threads = malloc(sizeof(pthread_t) * num_of_philo);
     pthread_mutex_t *forks;
     forks = malloc(sizeof(pthread_mutex_t) * num_of_philo);
 
-    for (int i = 0; i < num_of_philo; i++)
+    while (l < num_of_philo)
     {
-        pthread_mutex_init(&forks[i], NULL);
+        pthread_mutex_init(&forks[l], NULL);
+	l++;
     }
- 
+    create_philosophers_id(philos, num_of_philo, forks);
     while (j < num_of_philo)
     {
-        int *id = malloc(sizeof(int));
-        *id = j;
         pthread_create(&threads[j], NULL, philosopher_process, &philos[j]);
         j++;
     }
@@ -153,5 +178,6 @@ int main(int argc, char **argv)
 {
     check_arguments(argc, argv);
     main_porcess(argv);
+    //printf("%ld", get_current_time());
     return(0);
 }

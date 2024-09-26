@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 10:10:39 by badriano          #+#    #+#             */
-/*   Updated: 2024/09/19 11:57:45 by badriano         ###   ########.fr       */
+/*   Updated: 2024/09/26 18:42:57 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,10 @@
 
 typedef struct s_philo
 {
-    int 		    id;
-    int 		    eat_count;
-    int 		    total_philos;
+    int 		 id;
+    int 		 eat_count;
+    pthread_mutex_t	*fork;
+    int 		 total_philos;
 }	t_philo;
 //typedef struct s_data		t_data;
 //typedef struct timeval	t_time;
