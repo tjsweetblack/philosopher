@@ -6,11 +6,12 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 13:30:53 by badriano          #+#    #+#             */
-/*   Updated: 2024/08/27 10:39:08 by badriano         ###   ########.fr       */
+/*   Updated: 2024/09/19 10:42:16 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philosopher.h"
+
 
 int	process_specifier(char specifier, va_list args, int current_len)
 {
@@ -34,6 +35,7 @@ int	process_specifier(char specifier, va_list args, int current_len)
 
 int	ft_printf(const char *str, ...)
 {
+
 	va_list	args;
 	int		i;
 	int		len;
