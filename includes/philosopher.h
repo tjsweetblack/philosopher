@@ -42,6 +42,8 @@ typedef struct s_philo
     long		time_to_eat;
     long		time_to_sleep;
     int 		total_philos;
+    int 		meals_required; // Number of meals required to stop (optional)
+    int 		meals_finished;
     
 }	t_philo;
 //typedef struct s_data		t_data;
