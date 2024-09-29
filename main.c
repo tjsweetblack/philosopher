@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 10:10:42 by badriano          #+#    #+#             */
-/*   Updated: 2024/09/27 08:32:37 by badriano         ###   ########.fr       */
+/*   Updated: 2024/09/29 09:16:48 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,13 +84,14 @@ void create_philosophers_id(t_philo *philos, int num_of_philo, pthread_mutex_t *
         philos[i].total_philos = num_of_philo;
         philos[i].fork = forks;
         philos[i].last_meal_time = 0;
-        philos[i].time_to_die = atol(args[2]) * 1; // Convert to milliseconds
+        philos[i].time_to_die = atol(args[2]) * 1000; // Convert to milliseconds
         philos[i].start_time = start;
-        philos[i].time_to_eat = atol(args[3]);
+        philos[i].time_to_eat = atol(args[3]) * 1000;
         pthread_mutex_init(&philos[i].meal_lock, NULL); // Initialize mutex
         philos[i].is_eating = 0;
         philos[i].time_to_sleep = atol(args[4]) * 1000;
-        philos[i].meals_finished = 0;  // Initialize meals_finished flag
+        philos[i].meals_finished = 0;
+        philos[i].is_running = 1;  // Initialize meals_finished flag
         // Optional argument: number_of_times_each_philosopher_must_eat
         if (argc == 6)
             philos[i].meals_required = atoi(args[5]);
@@ -102,33 +103,71 @@ void create_philosophers_id(t_philo *philos, int num_of_philo, pthread_mutex_t *
 
 void ft_sleep(t_philo philo)
 {
+    if(philo.is_running == 0)
+    {
+        return ;
+    }
     printf("%ld philosopher %d is sleeping\n", get_current_time(philo.start_time), philo.id);
     usleep(philo.time_to_sleep); // Sleep for 200ms
 }
+void print_philo_message(char *message, t_philo philo)
+{
+    if(philo.is_running == 0)
+    {
+        return ;
+    }
+    printf("%ld philosopher %d %s\n", get_current_time(philo.start_time), philo.id, message);
 
+}
 void ft_right_fork(t_philo philo, pthread_mutex_t *forks)
 {
+    if(philo.is_running == 0)
+    {
+        return ;
+    }
     pthread_mutex_lock(&forks[philo.id - 1]);
-    printf("%ld philosopher %d held the right fork\n", get_current_time(philo.start_time), philo.id);
+    if (philo.is_running == 0) {
+        pthread_mutex_unlock(&forks[philo.id - 1]);
+        return;
+    }
+    print_philo_message("held the right fork", philo);
 }
 
 void ft_left_fork(t_philo philo, pthread_mutex_t *forks)
 {
+    if(philo.is_running == 0)
+    {
+        return ;
+    }
     pthread_mutex_lock(&forks[philo.id % philo.total_philos]);
-    printf("%ld philosopher %d held the left fork\n", get_current_time(philo.start_time), philo.id);
+    if (philo.is_running == 0) {
+        pthread_mutex_unlock(&forks[philo.id - 1]);
+        return;
+    }
+    print_philo_message("held the left fork", philo);
 }
 
 void ft_eat(t_philo *philo, pthread_mutex_t *forks)
 {
+    if(philo->is_running == 0)
+    {
+        return ;
+    }
     ft_right_fork(*philo, forks);
     ft_left_fork(*philo, forks);
-
+    if(philo->is_running == 0)
+    {
+        return ;
+    }
     pthread_mutex_lock(&philo->meal_lock); // Lock access to last_meal_time
     philo->last_meal_time = get_current_time(philo->start_time);
     philo->is_eating = 1; // Mark philosopher as eating
     pthread_mutex_unlock(&philo->meal_lock); // Unlock access
     philo->eat_count++;
-
+    if(philo->is_running == 0)
+    {
+        return ;
+    }
     printf("%ld philosopher %d is eating\n", get_current_time(philo->start_time), philo->id);
 
     usleep(philo->time_to_eat); // Eating for 200ms
@@ -136,10 +175,16 @@ void ft_eat(t_philo *philo, pthread_mutex_t *forks)
     pthread_mutex_lock(&philo->meal_lock); // Lock access again before changing the state
     philo->is_eating = 0; // Mark philosopher as done eating
     pthread_mutex_unlock(&philo->meal_lock); // Unlock access
-
+    if(philo->is_running == 0)
+    {
+        return ;
+    }
     printf("%ld philosopher %d left the right fork\n", get_current_time(philo->start_time), philo->id);
     pthread_mutex_unlock(&forks[philo->id - 1]);
-
+    if(philo->is_running == 0)
+    {
+        return ;
+    }
     printf("%ld philosopher %d left the left fork\n", get_current_time(philo->start_time), philo->id);
     pthread_mutex_unlock(&forks[philo->id % philo->total_philos]);
     
@@ -149,17 +194,37 @@ void ft_eat(t_philo *philo, pthread_mutex_t *forks)
 
 void ft_think(t_philo philo)
 {
+    if(philo.is_running == 0)
+    {
+        return ;
+    }
     printf("%ld philosopher %d is thinking\n", get_current_time(philo.start_time), philo.id);
 }
 
 void *philosopher_process(void *arg)
 {
     t_philo *philo = (t_philo *)arg;
-    while (1)
+    while (philo->is_running)
     {
+        if(philo->is_running == 0)
+        {
+            return NULL;
+        }
         ft_think(*philo);
+        if(philo->is_running == 0)
+        {
+            return NULL;
+        }
         ft_eat(philo, philo->fork);
+        if(philo->is_running == 0)
+        {
+            return NULL;
+        }
         ft_sleep(*philo);
+        if(philo->is_running == 0)
+        {
+            return NULL;
+        }
     }
     return NULL;
 }
@@ -170,8 +235,10 @@ void *monitor_philosophers(void *arg)
     int i;
     long current_time;
     int all_done;
+    int j;
 
-    while (1)
+    j = 0;
+    while (philos[0].is_running)
     {
         i = 0;
         all_done = 1;
@@ -186,24 +253,39 @@ void *monitor_philosophers(void *arg)
                 // Check if the philosopher has exceeded time_to_die
                 if ((current_time - philos[i].last_meal_time) > philos[i].time_to_die)
                 {
+                    while (j <= philos[0].total_philos)
+                    {
+                        philos[j].is_running = 0;
+                        j++;
+                    }
                     printf("%ld philosopher %d has died\n", get_current_time(philos[i].start_time), philos[i].id);
-                    exit(0); // Exit the program if a philosopher dies
+                    // Stop the simulation
                 }
             }
-            
+            if (!philos[0].is_running)
+            break;
             pthread_mutex_unlock(&philos[i].meal_lock); // Unlock after checking
             if (philos[i].meals_required != -1 && philos[i].meals_finished == 0)
             {
-                all_done = 0;
+               all_done = 0;
             }
             i++;
         }
-        if (all_done == 1)
+
+        // If all philosophers have eaten the required number of times, stop the simulation
+        if (all_done == 1 && philos[0].meals_required != -1)
         {
             printf("All philosophers have eaten %d times. Simulation stopping...\n", philos[0].meals_required);
-            exit(0);
+            while (j <= philos[0].total_philos)
+            {
+                philos[j].is_running = 0;
+                j++;
+            }
+                    
         }
-        usleep(1000); // Add a short delay to avoid excessive CPU usage
+        if (!philos[0].is_running)
+        break;
+        usleep(5); // Add a short dela   y to avoid excessive CPU usage
     }
     return NULL;
 }
