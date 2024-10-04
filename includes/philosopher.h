@@ -37,6 +37,7 @@ typedef struct s_philo
     long		    time_to_die;
     long		    start_time;
     pthread_mutex_t	*fork;
+    pthread_mutex_t	msg;
     pthread_mutex_t	meal_lock;
     int 		    is_eating;
     long		    time_to_eat;
@@ -44,7 +45,7 @@ typedef struct s_philo
     int 		    total_philos;
     int 		    meals_required; // Number of meals required to stop (optional)
     int 		    meals_finished;
-    int 		    is_running;
+    int 		    *is_running;
     
 }	t_philo;
 //typedef struct s_data		t_data;

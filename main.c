@@ -74,7 +74,7 @@ void create_philosophers_id(t_philo *philos, int num_of_philo, pthread_mutex_t *
 {
     int i;
     long start;
-
+    static int stop = 1;
     i = 0;
     start = get_time();
     while (i < num_of_philo)
@@ -88,10 +88,11 @@ void create_philosophers_id(t_philo *philos, int num_of_philo, pthread_mutex_t *
         philos[i].start_time = start;
         philos[i].time_to_eat = atol(args[3]) * 1000;
         pthread_mutex_init(&philos[i].meal_lock, NULL); // Initialize mutex
+        pthread_mutex_init(&philos[i].msg, NULL);
         philos[i].is_eating = 0;
         philos[i].time_to_sleep = atol(args[4]) * 1000;
         philos[i].meals_finished = 0;
-        philos[i].is_running = 1;  // Initialize meals_finished flag
+        philos[i].is_running = &stop;  // Initialize meals_finished flag
         // Optional argument: number_of_times_each_philosopher_must_eat
         if (argc == 6)
             philos[i].meals_required = atoi(args[5]);
@@ -112,12 +113,13 @@ void ft_sleep(t_philo philo)
 }
 void print_philo_message(char *message, t_philo philo)
 {
-    if(philo.is_running == 0)
-    {
-        return ;
-    }
-    printf("%ld philosopher %d %s\n", get_current_time(philo.start_time), philo.id, message);
-
+	if(philo.is_running == 0)
+	{
+		return ;
+	}
+    	pthread_mutex_lock(&philo.msg);
+   	printf("%ld philosopher %d %s\n", get_current_time(philo.start_time), philo.id, message);
+   	pthread_mutex_unlock(&philo.msg);
 }
 void ft_right_fork(t_philo philo, pthread_mutex_t *forks)
 {
@@ -129,8 +131,10 @@ void ft_right_fork(t_philo philo, pthread_mutex_t *forks)
     if (philo.is_running == 0) {
         pthread_mutex_unlock(&forks[philo.id - 1]);
         return;
+   }
+    if (*philo.is_running == 1) {
+    	print_philo_message("held the right fork", philo);
     }
-    print_philo_message("held the right fork", philo);
 }
 
 void ft_left_fork(t_philo philo, pthread_mutex_t *forks)
@@ -154,6 +158,10 @@ void ft_eat(t_philo *philo, pthread_mutex_t *forks)
         return ;
     }
     ft_right_fork(*philo, forks);
+    if(philo->is_running == 0)
+    {
+        return ;
+    }
     ft_left_fork(*philo, forks);
     if(philo->is_running == 0)
     {
@@ -253,17 +261,14 @@ void *monitor_philosophers(void *arg)
                 // Check if the philosopher has exceeded time_to_die
                 if ((current_time - philos[i].last_meal_time) > philos[i].time_to_die)
                 {
-                    while (j <= philos[0].total_philos)
-                    {
-                        philos[j].is_running = 0;
-                        j++;
-                    }
-                    printf("%ld philosopher %d has died\n", get_current_time(philos[i].start_time), philos[i].id);
-                    // Stop the simulation
+                        philos[i].is_running = 0;
+                        printf("%ld philosopher %d has died\n", get_current_time(philos[i].start_time), philos[i].id);
+
                 }
+                    // Stop the simulation
             }
             if (!philos[0].is_running)
-            break;
+           	 break;
             pthread_mutex_unlock(&philos[i].meal_lock); // Unlock after checking
             if (philos[i].meals_required != -1 && philos[i].meals_finished == 0)
             {
@@ -275,17 +280,17 @@ void *monitor_philosophers(void *arg)
         // If all philosophers have eaten the required number of times, stop the simulation
         if (all_done == 1 && philos[0].meals_required != -1)
         {
-            printf("All philosophers have eaten %d times. Simulation stopping...\n", philos[0].meals_required);
+            j = 0;
             while (j <= philos[0].total_philos)
             {
                 philos[j].is_running = 0;
                 j++;
             }
-                    
+            printf("All philosophers have eaten %d times. Simulation stopping...\n", philos[0].meals_required);
         }
         if (!philos[0].is_running)
-        break;
-        usleep(5); // Add a short dela   y to avoid excessive CPU usage
+	        return NULL;
+        usleep(10); // Add a short dela   y to avoid excessive CPU usage
     }
     return NULL;
 }
