@@ -2,11 +2,11 @@ NAME = philo
 CFLAGS = -Wall -Werror -Wextra -g
 CC = cc
 #UTILS_DIR = ./utils
-#CORE_DIR = ./core
-PRINTF_DIR = ./ft_printf
-#ERRORS_DIR = ./errors
+CORE_DIR = ./srcs
+UTILS_DIR = ./utils
+ERRORS_DIR = ./errors
 MAIN = main.c
-COMMON_SRC = $(wildcard ./*c $(PRINTF_DIR)/*.c) # Expands to all .c files in directories
+COMMON_SRC = $(wildcard ./*c $(UTILS_DIR)/*.c $(ERRORS_DIR)/*.c $(CORE_DIR)/*.c) # Expands to all .c files in directories
 OBJ = $(COMMON_SRC:.c=.o) #$(MAIN:.c=.o)
 
 all: $(NAME)
@@ -14,6 +14,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 
 	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
+	@clear
 	@echo "Program is ready!!"
 
 %.o: %.c
