@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 10:15:23 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/07 07:02:41 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:25:45 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,44 +53,40 @@ long	get_time(void)
 
 long	get_current_time(long start)
 {
-	// Get current time in milliseconds and subtract the start time
 	return (get_time() - start);
 }
+
 void	print_philo_message(char *message, t_philo philo)
 {
-	pthread_mutex_lock(&philo.msg);
-	if (philo.is_running == 0)
+	pthread_mutex_lock(&philo.env->msg);
+	if (philo.env->is_running == 0)
 	{
+		pthread_mutex_unlock(&philo.env->msg);
 		return ;
 	}
-	if (ft_strcmp(message, "R_FORK") == 0)
+	if (ft_strcmp(message, "FORK") == 0)
 	{
-		printf("%ld %d has taken the right fork\n",
-			get_current_time(philo.start_time), philo.id);
-	}
-	else if (ft_strcmp(message, "L_FORK") == 0)
-	{
-		printf("%ld %d has taken the left fork\n",
-			get_current_time(philo.start_time), philo.id);
+		printf("%ld %d has taken afork\n",
+			get_current_time(philo.env->start_time), philo.id);
 	}
 	else if (ft_strcmp(message, "EAT") == 0)
 	{
-		printf("%ld %d is eating\n", get_current_time(philo.start_time),
+		printf("%ld %d is eating\n", get_current_time(philo.env->start_time),
 			philo.id);
 	}
 	else if (ft_strcmp(message, "SLEEP") == 0)
 	{
-		printf("%ld %d is sleeping\n", get_current_time(philo.start_time),
+		printf("%ld %d is sleeping\n", get_current_time(philo.env->start_time),
 			philo.id);
 	}
 	else if (ft_strcmp(message, "THINK") == 0)
 	{
-		printf("%ld %d is thinking\n", get_current_time(philo.start_time),
+		printf("%ld %d is thinking\n", get_current_time(philo.env->start_time),
 			philo.id);
 	}
 	else if (ft_strcmp(message, "DIED") == 0)
 	{
-		printf("%ld %d died\n", get_current_time(philo.start_time), philo.id);
+		printf("%ld %d died\n", get_current_time(philo.env->start_time), philo.id);
 	}
-	pthread_mutex_unlock(&philo.msg);
+	pthread_mutex_unlock(&philo.env->msg);
 }

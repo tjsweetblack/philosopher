@@ -6,48 +6,48 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 10:10:42 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/07 09:20:52 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:31:42 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/philosopher.h"
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/time.h>
-#include <unistd.h>
 
-void	create_philosophers_id(t_philo *philos, int num_of_philo,
+void	store_to_struct(t_philo *philos, int num_of_philo,
 		pthread_mutex_t *forks, char **args, int argc)
 {
-	int			i;
-	long		start;
+	int		i;
+	long	start;
+	t_env	*env;
 
 	i = 0;
 	start = get_time();
-	philos->env->start_time = start;
-	philos->env->num_of_philo = num_of_philo;
-	philos->env->time_to_die = ft_atol(args[2]) * 1000;
-	philos->env->time_to_eat = ft_atol(args[3]) * 1000;
-	philos->env->time_to_sleep = ft_atol(args[4]) * 1000;
-	philos->env->is_running = 1;
-	pthread_mutex_init(&philos->env->msg, NULL);
+	env = malloc(sizeof(t_env));
+	if (env == NULL)
+	{
+		fprintf(stderr, "Error: Memory allocation failed\n");
+		exit(EXIT_FAILURE);
+	}
+	env->start_time = start;
+	env->num_of_philo = num_of_philo;
+	env->time_to_die = ft_atol(args[2]);
+	env->time_to_eat = ft_atol(args[3]) * 1000;
+	env->time_to_sleep = ft_atol(args[4]) * 1000;
+	env->is_running = 1;
+	env->fork = forks;
+	pthread_mutex_init(&env->msg, NULL);
+	if (argc == 6)
+		env->meals_required = ft_atol(args[5]);
+	else
+		env->meals_required = -1;
 	while (i < num_of_philo)
 	{
 		philos[i].id = i + 1;
 		philos[i].eat_count = 0;
-		philos[i].fork = forks;
 		philos[i].last_meal_time = 0;
-			// Convert to milliseconds
-		philos[i].start_time = start;
-		pthread_mutex_init(&philos[i].meal_lock, NULL); // Initialize mutex
+		pthread_mutex_init(&philos[i].meal_lock, NULL);
 		philos[i].is_eating = 0;
 		philos[i].meals_finished = 0;
-		// Optional argument: number_of_times_each_philosopher_must_eat
-		if (argc == 6)
-			philos->env->meals_required = ft_atol(args[5]) * 1000;
-		else
-			philos->env->meals_required = -1;
+		philos[i].env = env;
 		i++;
 	}
 }
@@ -58,54 +58,51 @@ void	*monitor_philosophers(void *arg)
 	int		i;
 	long	current_time;
 	int		all_done;
-	int		j;
 
 	philos = (t_philo *)arg;
-	j = 0;
 	while (philos->env->is_running)
 	{
 		i = 0;
 		all_done = 1;
-		while (i < philos[0].total_philos)
+		while (i < philos->env->num_of_philo)
 		{
 			pthread_mutex_lock(&philos[i].meal_lock);
-				// Lock before accessing last_meal_time or is_eating
+			// Lock before accessing last_meal_time or is_eating
 			// Skip the death check if the philosopher is eating
 			if (philos[i].is_eating == 0)
 			{
-				current_time = get_current_time(philos[i].start_time);
+				current_time = get_current_time(philos[i].env->start_time);
 				// Check if the philosopher has exceeded time_to_die
 				if ((current_time
-						- philos[i].last_meal_time) > philos[i].time_to_die)
+						- philos[i].last_meal_time) > philos[i].env->time_to_die)
 				{
-					philos[i].is_running = 0;
+					philos->env->is_running = 0;
 					printf("%ld philosopher %d has died\n",
-						get_current_time(philos[i].start_time), philos[i].id);
+						get_current_time(philos[i].env->start_time),
+						philos[i].id);
 				}
 				// Stop the simulation
 			}
-			if (!philos[0].is_running)
+			if (!philos->env->is_running)
 				break ;
 			pthread_mutex_unlock(&philos[i].meal_lock); // Unlock after checking
-			if (philos[i].meals_required != -1 && philos[i].meals_finished == 0)
+			if (philos->env->meals_required != -1
+				&& philos[i].meals_finished == 0)
 			{
 				all_done = 0;
 			}
 			i++;
 		}
 		// If all philosophers have eaten the required number of times,
-		//stop the simulation
-		if (all_done == 1 && philos[0].meals_required != -1)
+		// stop the simulation
+		if (all_done == 1 && philos->env->meals_required != -1)
 		{
-			j = 0;
-			while (j <= philos[0].total_philos)
-			{
-				philos[j].is_running = 0;
-				j++;
-			}
-			printf("All philosophers have eaten %d times. Simulation stopping...\n", philos[0].meals_required);
+			philos->env->is_running = 0;
+			printf("All philosophers have eaten");
+			printf("%d times. Simulation stopping...\n",
+				philos->env->meals_required);
 		}
-		if (!philos[0].is_running)
+		if (!philos->env->is_running)
 		{
 			return (NULL);
 		}
