@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 07:09:45 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/09 09:08:01 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:46:10 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void	initiate_threads(int argc, char **argv)
 	int				num_of_philo;
 	t_philo			*philos;
 	pthread_t		*threads;
-	//pthread_t		monitor;
+	pthread_t		monitor;
 	pthread_mutex_t	*forks;
 
 	num_of_philo = atoi(argv[1]);
@@ -80,7 +80,7 @@ void	initiate_threads(int argc, char **argv)
     init_mutexts(num_of_philo, forks);
 	store_to_struct(philos, num_of_philo, forks, argv, argc);
     create_philosofer_thread(num_of_philo, philos, threads);
-	//pthread_create(&monitor, NULL, monitor_philosophers, philos);
-    free_all(philos, num_of_philo, threads, forks);
+	pthread_create(&monitor, NULL, monitor_philosophers, philos);
     join_threads(threads, num_of_philo);
+    free_all(philos, num_of_philo, threads, forks);
 }

@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 10:10:42 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/09 13:31:42 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:39:15 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,12 @@ void	store_to_struct(t_philo *philos, int num_of_philo,
 	{
 		philos[i].id = i + 1;
 		philos[i].eat_count = 0;
-		philos[i].last_meal_time = 0;
+		philos[i].last_meal_time = get_time();
 		pthread_mutex_init(&philos[i].meal_lock, NULL);
 		philos[i].is_eating = 0;
 		philos[i].meals_finished = 0;
 		philos[i].env = env;
+		printf("%d\n", philos[i].id);
 		i++;
 	}
 }
