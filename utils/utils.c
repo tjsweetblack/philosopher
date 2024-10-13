@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 10:15:23 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/09 13:25:45 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/12 23:03:39 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void	print_philo_message(char *message, t_philo philo)
 	}
 	if (ft_strcmp(message, "FORK") == 0)
 	{
-		printf("%ld %d has taken afork\n",
+		printf("%ld %d has taken a fork\n",
 			get_current_time(philo.env->start_time), philo.id);
 	}
 	else if (ft_strcmp(message, "EAT") == 0)

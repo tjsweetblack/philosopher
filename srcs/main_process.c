@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 14:33:52 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/09 09:34:30 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/12 23:33:45 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	*philosopher_process(void *arg)
 		if (philo->env->is_running == 0)
 		{
 			return (NULL);
-        }
+        	}
 		ft_think(*philo);
 		if (philo->env->is_running == 0)
 		{

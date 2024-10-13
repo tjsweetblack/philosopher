@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 15:20:09 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/09 13:21:17 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/12 23:38:12 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ void	ft_eat(t_philo *philo, pthread_mutex_t *forks)
 	philo->eat_count++;
 	if (philo->env->is_running)
 	{
-		printf("%ld philosopher %d is eating\n",
+		printf("%ld %d is eating\n",
 		get_current_time(philo->env->start_time), philo->id);
 	}
 	usleep(philo->env->time_to_eat);
