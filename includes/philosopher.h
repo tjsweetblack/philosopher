@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 10:10:39 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/09 13:24:32 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/14 15:08:27 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,9 +52,6 @@ typedef struct s_philo
     int 		    meals_finished;
     struct s_env	*env;   
 }	t_philo;
-//typedef struct s_data		t_data;
-//typedef struct timeval	t_time
-//typedef struct s_mutex	t_mutex;
 //------------------printf-------------------------
 int		ft_putchar_len(char c, int current_len);
 int		ft_print_num(int num, int current_len);

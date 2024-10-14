@@ -6,51 +6,50 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 10:10:42 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/12 23:12:35 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/14 15:17:54 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./includes/philosopher.h"
 
-void	store_to_struct(t_philo *philos, int num_of_philo,
-		pthread_mutex_t *forks, char **args, int argc)
+void store_to_struct(t_philo *philos, int num_of_philo, pthread_mutex_t *forks, char **args, int argc)
 {
-	int		i;
-	long	start;
-	t_env	*env;
+    int i;
+    long start;
+    t_env *env;
 
-	i = 0;
-	start = get_time();
-	env = malloc(sizeof(t_env));
-	if (env == NULL)
-	{
-		fprintf(stderr, "Error: Memory allocation failed\n");
-		exit(EXIT_FAILURE);
-	}
-	env->start_time = start;
-	env->num_of_philo = num_of_philo;
-	env->time_to_die = ft_atol(args[2]);
-	env->time_to_eat = ft_atol(args[3]) * 1000;
-	env->time_to_sleep = ft_atol(args[4]) * 1000;
-	env->is_running = 1;
+    i = 0;
+    start = get_time();
+    env = malloc(sizeof(t_env));
+    if (env == NULL)
+    {
+        fprintf(stderr, "Error: Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    env->start_time = start;
+    env->num_of_philo = num_of_philo;
+    env->time_to_die = ft_atol(args[2]) * 1000;
+    env->time_to_eat = ft_atol(args[3]) * 1000;
 	env->fork = forks;
-	pthread_mutex_init(&env->msg, NULL);
-	if (argc == 6)
-		env->meals_required = ft_atol(args[5]);
-	else
-		env->meals_required = -1;
-	while (i < num_of_philo)
-	{
-		philos[i].id = i + 1;
-		philos[i].eat_count = 0;
-		philos[i].last_meal_time = get_time();
-		pthread_mutex_init(&philos[i].meal_lock, NULL);
-		philos[i].is_eating = 0;
-		philos[i].meals_finished = 0;
-		philos[i].env = env;
-		printf("%d\n", philos[i].id);
-		i++;
-	}
+    env->time_to_sleep = ft_atol(args[4]) * 1000;
+    env->is_running = 1;
+    pthread_mutex_init(&env->msg, NULL);
+
+    if (argc == 6)
+        env->meals_required = ft_atol(args[5]);
+    else
+        env->meals_required = -1;
+
+    while (i < num_of_philo)
+    {
+        philos[i].id = i + 1;
+        philos[i].last_meal_time = get_current_time(env->start_time);
+        pthread_mutex_init(&philos[i].meal_lock, NULL);
+        philos[i].is_eating = 0;
+        philos[i].meals_finished = 0;
+        philos[i].env = env;
+        i++;
+    }
 }
 
 void	*monitor_philosophers(void *arg)
@@ -112,15 +111,9 @@ void	*monitor_philosophers(void *arg)
 	return (NULL);
 }
 
-int	main(int argc, char **argv)
+int main(int argc, char **argv)
 {
-	if (check_arguments(argc, argv) == 0)
-	{
-		return (0);
-	}
-	else
-	{
-		initiate_threads(argc, argv);
-	}
-	return (0);
+    check_arguments(argc, argv);
+    initiate_threads(argc, argv);
+    return 0;
 }
