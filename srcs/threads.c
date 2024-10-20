@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 07:09:45 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/14 14:35:32 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/17 09:55:28 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void    free_all(t_philo *philos, int num_of_philo, pthread_t *threads,
     while (i < num_of_philo)
     {
         pthread_mutex_destroy(&forks[i]);
-        pthread_mutex_destroy(&philos[i].meal_lock);
+        pthread_mutex_destroy(&philos->env->meal_lock);
         i++;
     }
     pthread_mutex_destroy(&philos->env->msg);
@@ -88,8 +88,9 @@ void	initiate_threads(int argc, char **argv)
     else
     {
         create_philosofer_thread(num_of_philo, philos, threads);
-	    pthread_create(&monitor, NULL, monitor_philosophers, philos);
+	    pthread_create(&monitor, NULL, ft_monitoring, philos);
         join_threads(threads, num_of_philo);
+        pthread_join(monitor, NULL);
         free_all(philos, num_of_philo, threads, forks);
     }
 }

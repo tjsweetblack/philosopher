@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 14:33:52 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/14 14:25:48 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/19 23:59:38 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,20 @@ void	case_one(t_philo philo)
 	ft_think(philo);
 	print_philo_message("FORK",philo);
 	print_philo_message("SLEEP",philo);
-	usleep(philo.env->time_to_die);
-	print_philo_message("DIED",philo);
+	usleep(10); 
+	print_philo_message("DIED",philo);	
+}
+void	ft_reset_cycle(t_philo *philo)
+{
+	int i;
+
+	i = 0;
+	while (i < philo->env->num_of_philo)
+	{
+		philo[i].cycle_flag = 0;
+		i++;
+	}
+	philo->env->cycle_count = 0;
 }
 void	*philosopher_process(void *arg)
 {
@@ -33,24 +45,19 @@ void	*philosopher_process(void *arg)
 	while (philo->env->is_running)
 	{
 		if (philo->env->is_running == 0)
-		{
 			return (NULL);
-        }
 		ft_think(*philo);
 		if (philo->env->is_running == 0)
-		{
 			return (NULL);
-		}
-		ft_eat(philo, philo->env->fork);
+		if(philo->cycle_flag != 1 && philo->eat_count != philo->env->meals_required)
+			ft_eat(philo, philo->env->fork);
 		if (philo->env->is_running == 0)
-		{
 			return (NULL);
-		}
 		ft_sleep(*philo);
 		if (philo->env->is_running == 0)
-		{
 			return (NULL);
-		}
+		if(philo->env->cycle_count == philo->env->num_of_philo)
+			ft_reset_cycle(philo);
     }
 	return (NULL);
 }

@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/27 10:10:39 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/14 15:08:27 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/19 23:50:57 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,6 @@
 # include <stdarg.h>
 #include <string.h>
 
-/*typedef struct s_status
-{
-    int		dead;
-    int     sleep;
-    int     eat;
-    int     think;
-} t_status;*/
-
 typedef struct s_env
 {
     long    start_time;
@@ -36,7 +28,11 @@ typedef struct s_env
     int		time_to_die;
     int		time_to_eat;
     int		time_to_sleep;
+    pthread_mutex_t	meal_lock;
     int		meals_required;
+    int     cycle_count;
+    int     total_times_eaten;
+    int     philos_finished_in_cycle;
     int		is_running;
     pthread_mutex_t	*fork;
     pthread_mutex_t msg;
@@ -47,10 +43,10 @@ typedef struct s_philo
     int 		    id;
     int 		    eat_count;
     long		    last_meal_time;
-    pthread_mutex_t	meal_lock;
-    int 		    is_eating; // Number of meals required to stop (optional)
+    int 		    is_eating;
+    int 		    cycle_flag;
     int 		    meals_finished;
-    struct s_env	*env;   
+    struct s_env	*env; 
 }	t_philo;
 //------------------printf-------------------------
 int		ft_putchar_len(char c, int current_len);
@@ -70,8 +66,8 @@ void	ft_eat(t_philo *philo, pthread_mutex_t *forks);
 void	ft_think(t_philo philo);
 void	print_philo_message(char *message, t_philo philo);
 int     ft_strcmp(char *s1, char *s2);
-void	*monitor_philosophers(void *arg);
 void	initiate_threads(int argc, char **argv);
+void	*ft_monitoring(void *args);
 void	store_to_struct(t_philo *philos, int num_of_philo, pthread_mutex_t *forks, char **args, int argc);
 
 //------------------

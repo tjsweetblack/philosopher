@@ -6,7 +6,7 @@
 /*   By: badriano <belmiro@student.42.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 10:15:23 by badriano          #+#    #+#             */
-/*   Updated: 2024/10/14 06:53:54 by badriano         ###   ########.fr       */
+/*   Updated: 2024/10/17 11:27:32 by badriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,11 @@ long	get_current_time(long start)
 void	print_philo_message(char *message, t_philo philo)
 {
 	pthread_mutex_lock(&philo.env->msg);
+	if (ft_strcmp(message, "DIED") == 0)
+	{
+		printf("%ld %d died\n", get_current_time(philo.env->start_time), philo.id);
+		usleep(10);
+	}
 	if (philo.env->is_running == 0)
 	{
 		pthread_mutex_unlock(&philo.env->msg);
@@ -66,28 +71,32 @@ void	print_philo_message(char *message, t_philo philo)
 	}
 	if (ft_strcmp(message, "FORK") == 0)
 	{
-		printf("%ld %d has taken a fork\n",
+		if(philo.env->is_running){
+			printf("%ld %d has taken a fork\n",
 			get_current_time(philo.env->start_time), philo.id);
+		}
 	}
 	else if (ft_strcmp(message, "EAT") == 0)
 	{
-		printf("%ld %d is eating\n", get_current_time(philo.env->start_time),
+		if(philo.env->is_running){
+			printf("%ld %d is eating\n", get_current_time(philo.env->start_time),
 			philo.id);
+		}
 	}
 	else if (ft_strcmp(message, "SLEEP") == 0)
 	{
+		if(philo.env->is_running){
 		printf("%ld %d is sleeping\n", get_current_time(philo.env->start_time),
 			philo.id);
+		}
 	}
 	else if (ft_strcmp(message, "THINK") == 0)
 	{
+		if(philo.env->is_running){
 		printf("%ld %d is thinking\n", get_current_time(philo.env->start_time),
 			philo.id);
+		}
 	}
-	else if (ft_strcmp(message, "DIED") == 0)
-	{
-		printf("%ld %d died\n", get_current_time(philo.env->start_time), philo.id);
-		usleep(10);
-	}
+	
 	pthread_mutex_unlock(&philo.env->msg);
 }
